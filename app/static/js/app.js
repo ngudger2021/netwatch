@@ -410,21 +410,66 @@
       || `<li class="text-secondary">No network units recorded yet.</li>`;
   }
 
+  /* ---------- vulnerability checks (findings page) ---------------------- */
+  let vulnTimer = null;
+  async function initVulnButtons() {
+    const admin = window.__nwUser && window.__nwUser.role === "admin";
+    if (!admin) return;
+    const tools = await api("GET", "/api/v1/vulnerability-tools").catch(() => null);
+    const setBtn = (id, enabled, installed, label) => {
+      const b = $("#" + id);
+      if (!b) return;
+      b.disabled = !enabled || !installed;
+      b.title = !enabled ? "Disabled in config ([vulnerability]). " + label
+        : !installed ? "Tool not installed on this Pi. " + label : b.title;
+    };
+    if (tools) {
+      setBtn("vuln-vulners", tools.vulners.enabled, tools.vulners.installed, "Enable vulners_enabled in netwatch.toml.");
+      setBtn("vuln-nuclei", tools.nuclei.enabled, tools.nuclei.installed, "Enable nuclei_enabled in netwatch.toml.");
+    }
+    $("#vuln-check").addEventListener("click", () => runVuln({ tools: ["searchsploit"] }));
+    $("#vuln-vulners").addEventListener("click", () => runVuln({ tools: ["vulners"] }));
+    $("#vuln-nuclei").addEventListener("click", () => runVuln({ tools: ["nuclei"] }));
+    const st = await api("GET", "/api/v1/vulnerability-checks/status").catch(() => null);
+    if (st && st.state === "running") pollVuln();
+  }
+
+  async function runVuln(body) {
+    try {
+      const res = await api("POST", "/api/v1/vulnerability-checks", body);
+      if (res.searchsploit) {
+        const t = res.searchsploit.totals;
+        toast(`Known exploits: ${t.ports_checked} ports checked, ${t.ports_with_references} with public references${res.searchsploit.budget_exhausted ? " (limit reached)" : ""}`, "ok");
+        loadFindings();
+      }
+      if (res.started) { toast("Background check started", "ok"); pollVuln(); }
+    } catch (ex) { toast(ex.message, "error"); }
+  }
+
+  function pollVuln() {
+    clearTimeout(vulnTimer);
+    const label = $("#vuln-status");
+    const tick = async () => {
+      let st;
+      try { st = await api("GET", "/api/v1/vulnerability-checks/status"); }
+      catch (_) { vulnTimer = setTimeout(tick, 5000); return; }
+      if (st.state === "running") {
+        if (label) label.textContent = `Running ${(st.tools || []).join(" + ")} since ${fmtTime(st.started)}…`;
+        vulnTimer = setTimeout(tick, 4000);
+        return;
+      }
+      if (label) label.textContent = st.state === "done" ? `Last run finished ${fmtTime(st.finished)}` : (st.error ? "Error: " + st.error : "");
+      if (st.state === "done") { toast("Check finished: " + JSON.stringify(st.result), "ok"); loadFindings(); }
+      if (st.state === "error") toast(st.error || "Check failed", "error");
+    };
+    tick();
+  }
+
   /* ---------- findings ------------------------------------------------ */
   const findState = { page: 1, size: 50 };
   async function initFindings() {
     ["#fs-status", "#fs-sev"].forEach((s) => $(s).addEventListener("change", () => { findState.page = 1; loadFindings(); }));
-    const vc = $("#vuln-check");
-    if (vc) vc.addEventListener("click", async () => {
-      vc.disabled = true;
-      try {
-        const r = await api("POST", "/api/v1/vulnerability-checks", {});
-        const t = r.totals;
-        toast(`Checked ${t.ports_checked} ports on ${r.devices} devices; ${t.ports_with_references} with public references${r.budget_exhausted ? " (limit reached)" : ""}`, "ok");
-        loadFindings();
-      } catch (ex) { toast(ex.message, "error"); }
-      finally { vc.disabled = false; }
-    });
+    initVulnButtons();
     $("#fn-prev").addEventListener("click", () => { if (findState.page > 1) { findState.page--; loadFindings(); } });
     $("#fn-next").addEventListener("click", () => { findState.page++; loadFindings(); });
     loadFindings();

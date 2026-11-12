@@ -333,45 +333,66 @@ def update_alert_rules(body: AlertRulesUpdate, request: Request, conn=Depends(ge
 # ---------- vulnerability checks -------------------------------------------
 class VulnCheckBody(BaseModel):
     device_id: Optional[int] = Field(None, ge=1)
+    tools: list[Literal["searchsploit", "vulners", "nuclei"]] = Field(default_factory=lambda: ["searchsploit"],
+                                                                      min_length=1, max_length=3)
 
 
-@router.get("/vulnerability-tools", tags=["security"], summary="Which local vulnerability tools are installed")
-def vulnerability_tools(_=Depends(require_viewer)):
-    from app.services import vuln_lookup
-    return vuln_lookup.tool_status()
+@router.get("/vulnerability-tools", tags=["security"], summary="Which vulnerability tools are installed and enabled")
+def vulnerability_tools(settings: Settings = Depends(get_settings), _=Depends(require_viewer)):
+    from app.services import vuln_lookup, vuln_scan
+    out = {"searchsploit": vuln_lookup.tool_status()["searchsploit"]}
+    out.update(vuln_scan.status(settings))
+    return out
+
+
+@router.get("/vulnerability-checks/status", tags=["security"], summary="State of the current or last background run")
+def vulnerability_status(conn=Depends(get_conn), _=Depends(require_viewer)):
+    from app.services import vuln_runner
+    return vuln_runner.read_status(conn)
 
 
 @router.post("/vulnerability-checks", tags=["security"], status_code=200,
              dependencies=[Depends(require_admin_csrf)],
-             summary="Look up public exploit references for detected service versions (no target contact)")
+             summary="Run known-exploit and CVE checks. searchsploit runs now; vulners/nuclei run in the background")
 def run_vulnerability_check(body: VulnCheckBody, request: Request, conn=Depends(get_conn),
-                            session=Depends(require_admin)):
-    from app.services import vuln_lookup
-    if vuln_lookup.searchsploit_path() is None:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            "searchsploit is not installed; run: sudo apt install exploitdb")
-    if body.device_id is not None:
-        if conn.execute("SELECT 1 FROM devices WHERE id = ?", (body.device_id,)).fetchone() is None:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "device not found")
-        device_ids = [body.device_id]
-    else:
-        device_ids = [r[0] for r in conn.execute(
+                            settings: Settings = Depends(get_settings), session=Depends(require_admin)):
+    from app.services import vuln_lookup, vuln_runner
+    if body.device_id is not None and conn.execute("SELECT 1 FROM devices WHERE id = ?", (body.device_id,)).fetchone() is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "device not found")
+    tools = list(dict.fromkeys(body.tools))
+    response: dict = {"started": False}
+    if "searchsploit" in tools:
+        if vuln_lookup.searchsploit_path() is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                "searchsploit is not installed; run: sudo apt install exploitdb")
+        device_ids = [body.device_id] if body.device_id is not None else [r[0] for r in conn.execute(
             "SELECT DISTINCT device_id FROM open_ports WHERE state='open' AND product != '' ORDER BY device_id")]
-    results = []
-    budget = vuln_lookup.MAX_LOOKUPS_PER_RUN
-    for device_id in device_ids:
-        if budget <= 0:
-            break
+        results, budget = [], vuln_lookup.MAX_LOOKUPS_PER_RUN
+        for device_id in device_ids:
+            if budget <= 0:
+                break
+            try:
+                res = vuln_lookup.check_device(conn, device_id)
+            except vuln_lookup.VulnLookupError as exc:
+                raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc))
+            budget -= res["ports_checked"]
+            results.append(res)
+        totals = {k: sum(r[k] for r in results) for k in ("ports_checked", "ports_with_references", "ports_skipped")}
+        response["searchsploit"] = {"devices": len(results), "budget_exhausted": budget <= 0, "totals": totals}
+        audit(conn, session["username"], "searchsploit_check", f"devices:{len(results)}", json.dumps(totals),
+              client_ip(request))
+    background = [t for t in tools if t in ("vulners", "nuclei")]
+    if background:
         try:
-            res = vuln_lookup.check_device(conn, device_id)
-        except vuln_lookup.VulnLookupError as exc:
-            raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc))
-        budget -= res["ports_checked"]
-        results.append(res)
-    totals = {k: sum(r[k] for r in results) for k in ("ports_checked", "ports_with_references", "ports_skipped")}
-    audit(conn, session["username"], "vulnerability_check", f"devices:{len(results)}",
-          json.dumps(totals), client_ip(request))
-    return {"devices": len(results), "budget_exhausted": budget <= 0, "totals": totals, "results": results}
+            response["status"] = vuln_runner.start(settings, background, [body.device_id] if body.device_id else None,
+                                                   conn=conn)
+            response["started"] = True
+        except vuln_runner.VulnRunRefused as exc:
+            raise HTTPException(status.HTTP_409_CONFLICT if "already" in str(exc) or "queued" in str(exc)
+                                else status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+        audit(conn, session["username"], "vuln_run_start", ",".join(background),
+              str(body.device_id or "all"), client_ip(request))
+    return response
 
 
 # ---------- reports & audit ------------------------------------------------

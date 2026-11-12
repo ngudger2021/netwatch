@@ -1,0 +1,4 @@
+{"template-id":"tech-detect","info":{"name":"Technology Detection","severity":"info","tags":["tech"]},"matched-at":"http://192.168.50.1:80/"}
+{"template-id":"router-admin-panel","info":{"name":"Router admin panel","severity":"medium","tags":["panel"]},"matched-at":"http://192.168.50.1:80/login.asp"}
+{"template-id":"git-config-exposed","info":{"name":"Exposed .git/config","severity":"high","tags":["exposure"]},"matched-at":"http://192.168.50.1:8080/.git/config"}
+this line is not json

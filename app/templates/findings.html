@@ -8,6 +8,9 @@
     <select id="fs-status" class="form-select form-select-sm" style="width:auto">
       <option value="open">Open</option><option value="acknowledged">Acknowledged</option><option value="resolved">Resolved</option><option value="all">All</option></select>
     <button id="vuln-check" class="btn btn-sm btn-outline-warning admin-only" title="Looks up public exploit references for detected versions. Does not contact devices.">Check known exploits</button>
+    <button id="vuln-vulners" class="btn btn-sm btn-outline-warning admin-only" title="Asks nmap's vulners script for CVEs. Sends service names and versions to vulners.com.">CVE check (vulners)</button>
+    <button id="vuln-nuclei" class="btn btn-sm btn-outline-danger admin-only" title="Sends HTTP requests to web ports with read-only exposure templates.">Web exposure (Nuclei)</button>
+    <span id="vuln-status" class="small text-secondary align-self-center"></span>
     <select id="fs-sev" class="form-select form-select-sm" style="width:auto">
       <option value="">Any severity</option><option>critical</option><option>high</option><option>medium</option><option>low</option><option>info</option></select>
   </div>

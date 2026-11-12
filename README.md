@@ -267,17 +267,49 @@ Browser clients use the session cookie. Scripts can log in with `POST /auth/logi
 
 ---
 
-## Known-exploit checks (searchsploit)
+## Vulnerability checks
 
-Requires the ExploitDB tools on the Pi: `sudo apt install exploitdb`.
+Three checks, from safest to most intrusive. All are manual and admin-only, and none runs during a scan.
 
-- Runs from the **Findings** page with **Check known exploits** (admin), or `POST /api/v1/vulnerability-checks` with `{}` for all devices or `{"device_id": N}` for one.
-- It reads the product and version nmap recorded for each open port and searches a local copy of ExploitDB. **It does not contact the device.**
-- A match is stored as a medium-severity finding titled *"Public exploit references for detected version (unverified)"* with the ExploitDB IDs and any CVE IDs ExploitDB lists. A match means public material exists for a similar version. It does not prove the device is vulnerable. Banners can be wrong, and many entries are for other platforms.
-- Each run is limited to 200 lookups. Ports whose product is blank or contains unusual characters are skipped.
-- Check the tool status with `GET /api/v1/vulnerability-tools`.
+| Check | What it does | Sends data? | Default |
+|---|---|---|---|
+| **Known exploits (searchsploit)** | Looks up detected product and version in a local ExploitDB copy | No, nothing leaves the Pi | On when `exploitdb` is installed |
+| **CVE check (vulners)** | Runs nmap's `vulners` script, which lists CVE IDs and CVSS scores for detected versions | **Yes: service names and versions go to vulners.com** | Off (`vulners_enabled = false`) |
+| **Web exposure (Nuclei)** | Sends read-only HTTP requests to web ports using exposure, misconfiguration, technology and panel templates | **Yes: HTTP requests to your devices** | Off (`nuclei_enabled = false`) |
 
-Not yet available: the `vulners` NSE script and Nuclei templates. Both need approval (see IMPLEMENTATION_CHECKLIST.md).
+### Installing the tools (run these yourself)
+
+```bash
+sudo apt install exploitdb                      # searchsploit
+sudo apt install nuclei                         # Nuclei; then:
+nuclei -update-templates                        # downloads templates from the internet
+# vulners script (only if you enable it):
+sudo wget -O /usr/share/nmap/scripts/vulners.nse https://raw.githubusercontent.com/vulnersCom/nmap-vulners/master/vulners.nse
+sudo nmap --script-updatedb
+```
+
+Check what NetWatch can see at **Findings → Check known exploits** or `GET /api/v1/vulnerability-tools`. The package and script names above are from memory of Kali's repositories and the vulners project. If `apt` cannot find `nuclei`, check the output and tell me.
+
+### Enabling the online tools
+
+In `/etc/kali-netwatch/netwatch.toml`, under `[vulnerability]`:
+
+```toml
+vulners_enabled = true   # service names/versions are sent to vulners.com
+nuclei_enabled = true    # HTTP requests are sent to web ports on your devices
+```
+
+Restart the web and scheduler services after editing.
+
+### What the results mean
+
+- Every finding is labelled **unverified**. It says a tool reported something for the detected version, not that the device is exploitable.
+- **Known exploits:** matches are medium severity. Many ExploitDB entries are for other platforms or old versions. Each run is limited to 200 lookups.
+- **CVE check:** severity follows the highest CVSS score listed for that port (9.0+ critical, 7.0+ high, 4.0+ medium, else low). Patched backports can still be reported.
+- **Web exposure:** templates run in low-rate mode (5 requests per second). Templates tagged `dos`, `fuzz`, `intrusive`, `brute-force`, `default-login`, and injection types are excluded. Out-of-band callbacks are disabled. Each match needs a manual look at the URL before you act on it.
+- Runs refuse to start while a scan is queued or running, and only one check runs at a time. Progress is shown on the Findings page.
+
+Nuclei and vulners only act on devices on your configured networks, and only on ports nmap already saw open. Scan one device first if you want to see the effect before running everything.
 
 ## Tests
 

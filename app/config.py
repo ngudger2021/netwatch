@@ -99,6 +99,17 @@ class TelegramConfig(BaseModel):
     # Secrets come from the environment: NETWATCH_TELEGRAM_BOT_TOKEN, NETWATCH_TELEGRAM_CHAT_ID
 
 
+class VulnerabilityConfig(BaseModel):
+    # vulners sends service names and versions to vulners.com over the internet. Off by default.
+    vulners_enabled: bool = False
+    # Nuclei sends HTTP requests to web ports of devices. Off by default; templates must be installed.
+    nuclei_enabled: bool = False
+    nuclei_templates_dir: str = ""           # empty = nuclei's default template directory
+    max_ports_per_device: int = Field(20, ge=1, le=100)
+    max_urls: int = Field(50, ge=1, le=500)
+    timeout_seconds: int = Field(1800, ge=60, le=7200)
+
+
 class Settings(BaseModel):
     app: AppConfig = Field(default_factory=AppConfig)
     networks: NetworksConfig = Field(default_factory=NetworksConfig)
@@ -106,6 +117,7 @@ class Settings(BaseModel):
     schedule: ScheduleConfig = Field(default_factory=ScheduleConfig)
     change: ChangeConfig = Field(default_factory=ChangeConfig)
     telegram: TelegramConfig = Field(default_factory=TelegramConfig)
+    vulnerability: VulnerabilityConfig = Field(default_factory=VulnerabilityConfig)
 
     @model_validator(mode="after")
     def _cross_checks(self) -> "Settings":

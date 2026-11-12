@@ -93,7 +93,7 @@ def test_endpoint_refuses_without_tool_and_requires_admin(client, conn, monkeypa
     monkeypatch.setattr(vl, "searchsploit_path", lambda: None)
     client.post("/api/v1/auth/login", json={"username": "admin", "password": "correct horse battery"})
     token = client.get("/api/v1/auth/me").json()["csrf_token"]
-    res = client.post("/api/v1/vulnerability-checks", json={}, headers={"X-CSRF-Token": token})
+    res = client.post("/api/v1/vulnerability-checks", json={"tools": ["searchsploit"]}, headers={"X-CSRF-Token": token})
     assert res.status_code == 422 and "exploitdb" in res.text
     client.post("/api/v1/auth/logout", headers={"X-CSRF-Token": token})
     client.post("/api/v1/auth/login", json={"username": "viewer1", "password": "viewer password long"})
@@ -108,6 +108,6 @@ def test_endpoint_runs_with_fake_tool(client, conn, net_ids, monkeypatch):
     client.post("/api/v1/auth/login", json={"username": "admin", "password": "correct horse battery"})
     token = client.get("/api/v1/auth/me").json()["csrf_token"]
     res = client.post("/api/v1/vulnerability-checks", json={}, headers={"X-CSRF-Token": token})
-    assert res.status_code == 200 and res.json()["totals"]["ports_with_references"] == 1
+    assert res.status_code == 200 and res.json()["searchsploit"]["totals"]["ports_with_references"] == 1
     tools = client.get("/api/v1/vulnerability-tools").json()
-    assert "searchsploit" in tools and tools["vulners"]["installed"] is False
+    assert "searchsploit" in tools and tools["vulners"]["enabled"] is False and tools["nuclei"]["enabled"] is False

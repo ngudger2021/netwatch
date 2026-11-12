@@ -28,14 +28,30 @@ Decisions taken: manual-only; no exploitation; findings are version-based and la
 - [x] Docs: README section (Known-exploit checks)
 - [ ] Telegram/alert for exploitdb findings: currently no finding_new event is raised by the lookup (decide)
 
+## Vulners + Nuclei (current work, approved by user "get this working")
+Decisions: both OFF by default in netwatch.toml ([vulnerability]); vulners sends banners to vulners.com (user must opt in);
+Nuclei restricted to exposure/misconfig/tech/panel templates, excludes dos/fuzz/intrusive/brute-force/default-login, low rate.
+Runs are manual, in a background thread, one at a time, refused while a scan is running.
+- [x] Config: [vulnerability] section (vulners_enabled, nuclei_enabled, nuclei_templates_dir, limits); both off by default
+- [x] vulners: nmap argv (-sT -sV --script vulners -p ... ) with validated IP + ports; output parser (CVE + CVSS)
+- [x] vulners findings: rule vulners_cve, severity by CVSS, unverified label
+- [x] nuclei: target URLs from open web ports only; argv with fixed safe flags; JSONL parser; exact host+port matching (fixed prefix bug found in review)
+- [x] nuclei findings: rule nuclei_match per port
+- [x] Background runner with status in app_settings, lock, refuses during scans (app/services/vuln_runner.py)
+- [x] API: GET /api/v1/vulnerability-tools, GET /api/v1/vulnerability-checks/status, POST /api/v1/vulnerability-checks with tools list
+- [x] Findings page: tool buttons (disabled when off or not installed) + progress polling
+- [x] Tests with fake nmap XML containing vulners output and fake nuclei JSONL (tests/test_vuln_scan.py)
+- [ ] Verify on Pi after installing: `nuclei -version`, `nmap --script-help vulners` (package names in README are unverified)
+
 ## Not started / awaiting your decision
 - [!] Install exploitdb on the Pi: `sudo apt install exploitdb` (system change; run it yourself)
-- [!] `vulners` NSE script (network traffic to devices = version probes only; needs install; awaiting approval)
-- [!] Nuclei template scan (sends real HTTP requests; awaiting approval and a reviewed template list)
+- [x] `vulners` NSE script built (install step is the user's; see README)
+- [x] Nuclei template scan built (install step is the user's; see README)
 - [ ] Two-factor login for NetWatch (not requested yet)
 - [ ] Vendor CDN assets for offline use
 
 ## Verification log
 - 2026-11-12: 168 tests passing before vulnerability work started
 - 2026-11-12: 185 tests passing after vulnerability lookup (searchsploit) added. Not yet run on the Pi (needs exploitdb installed)
+- 2026-11-12: 206 tests passing after vulners + Nuclei added (incl. background run success and lock-refusal tests). Not yet run on the Pi
 - Found and fixed during this work: late-bound search function default (tests caught it); audit sync would have wiped non-builtin findings

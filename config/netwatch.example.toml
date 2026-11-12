@@ -39,3 +39,12 @@ recent_days = 7
 enabled = false
 cooldown_seconds = 900
 daily_summary = true
+
+[vulnerability]
+# Both tools are OFF until you enable them. See README "Vulnerability checks".
+vulners_enabled = false   # sends service names/versions to vulners.com
+nuclei_enabled = false    # sends HTTP requests to devices' web ports
+nuclei_templates_dir = ""
+max_ports_per_device = 20
+max_urls = 50
+timeout_seconds = 1800
