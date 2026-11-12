@@ -1,0 +1,13 @@
+{
+  "SEARCH": "OpenSSH 7.4",
+  "DB_PATH_EXPLOIT": "/usr/share/exploitdb",
+  "RESULTS_EXPLOIT": [
+    {"Title": "OpenSSH 7.4 - Example Username Enumeration", "EDB-ID": "40136", "Date": "2018-07-19",
+     "Path": "/usr/share/exploitdb/exploits/linux/remote/40136.py", "Type": "remote", "Platform": "linux",
+     "Codes": "CVE-2018-15473;OSVDB-99999"},
+    {"Title": "OpenSSH 7.4 - Example Race Condition", "EDB-ID": "45001", "Date": "2018-12-01",
+     "Path": "/usr/share/exploitdb/exploits/linux/local/45001.c", "Type": "local", "Platform": "linux",
+     "Codes": ""}
+  ],
+  "RESULTS_SHELLCODE": []
+}

@@ -330,6 +330,50 @@ def update_alert_rules(body: AlertRulesUpdate, request: Request, conn=Depends(ge
     return {"ok": True, "updated": len(body.rules)}
 
 
+# ---------- vulnerability checks -------------------------------------------
+class VulnCheckBody(BaseModel):
+    device_id: Optional[int] = Field(None, ge=1)
+
+
+@router.get("/vulnerability-tools", tags=["security"], summary="Which local vulnerability tools are installed")
+def vulnerability_tools(_=Depends(require_viewer)):
+    from app.services import vuln_lookup
+    return vuln_lookup.tool_status()
+
+
+@router.post("/vulnerability-checks", tags=["security"], status_code=200,
+             dependencies=[Depends(require_admin_csrf)],
+             summary="Look up public exploit references for detected service versions (no target contact)")
+def run_vulnerability_check(body: VulnCheckBody, request: Request, conn=Depends(get_conn),
+                            session=Depends(require_admin)):
+    from app.services import vuln_lookup
+    if vuln_lookup.searchsploit_path() is None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "searchsploit is not installed; run: sudo apt install exploitdb")
+    if body.device_id is not None:
+        if conn.execute("SELECT 1 FROM devices WHERE id = ?", (body.device_id,)).fetchone() is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "device not found")
+        device_ids = [body.device_id]
+    else:
+        device_ids = [r[0] for r in conn.execute(
+            "SELECT DISTINCT device_id FROM open_ports WHERE state='open' AND product != '' ORDER BY device_id")]
+    results = []
+    budget = vuln_lookup.MAX_LOOKUPS_PER_RUN
+    for device_id in device_ids:
+        if budget <= 0:
+            break
+        try:
+            res = vuln_lookup.check_device(conn, device_id)
+        except vuln_lookup.VulnLookupError as exc:
+            raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc))
+        budget -= res["ports_checked"]
+        results.append(res)
+    totals = {k: sum(r[k] for r in results) for k in ("ports_checked", "ports_with_references", "ports_skipped")}
+    audit(conn, session["username"], "vulnerability_check", f"devices:{len(results)}",
+          json.dumps(totals), client_ip(request))
+    return {"devices": len(results), "budget_exhausted": budget <= 0, "totals": totals, "results": results}
+
+
 # ---------- reports & audit ------------------------------------------------
 @router.get("/reports/{dataset}/{fmt}", tags=["reports"], summary="Download a report (csv, json or html)")
 def download_report(dataset: str, fmt: str, conn=Depends(get_conn), _=Depends(require_viewer)):

@@ -7,6 +7,7 @@
   <div class="d-flex gap-2">
     <select id="fs-status" class="form-select form-select-sm" style="width:auto">
       <option value="open">Open</option><option value="acknowledged">Acknowledged</option><option value="resolved">Resolved</option><option value="all">All</option></select>
+    <button id="vuln-check" class="btn btn-sm btn-outline-warning admin-only" title="Looks up public exploit references for detected versions. Does not contact devices.">Check known exploits</button>
     <select id="fs-sev" class="form-select form-select-sm" style="width:auto">
       <option value="">Any severity</option><option>critical</option><option>high</option><option>medium</option><option>low</option><option>info</option></select>
   </div>

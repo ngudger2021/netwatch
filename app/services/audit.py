@@ -182,7 +182,12 @@ def sync_device_findings(conn: sqlite3.Connection, device_id: int, device_type: 
                                "device_id": device_id,
                                "details": {"rule": f.rule_key, "port": f.port}})
 
+    builtin_rules = {r.key for r in RULES}
     for key, row in existing.items():
+        # Only findings produced by the built-in rules are resolved here. Findings from other
+        # checks (e.g. exploitdb_match) are managed by their own check and must survive a sync.
+        if row["rule_key"] not in builtin_rules:
+            continue
         if key not in current_keys and row["status"] != "resolved":
             conn.execute("UPDATE security_findings SET status='resolved', resolved_at=? WHERE id=?",
                          (now, row["id"]))

@@ -414,6 +414,17 @@
   const findState = { page: 1, size: 50 };
   async function initFindings() {
     ["#fs-status", "#fs-sev"].forEach((s) => $(s).addEventListener("change", () => { findState.page = 1; loadFindings(); }));
+    const vc = $("#vuln-check");
+    if (vc) vc.addEventListener("click", async () => {
+      vc.disabled = true;
+      try {
+        const r = await api("POST", "/api/v1/vulnerability-checks", {});
+        const t = r.totals;
+        toast(`Checked ${t.ports_checked} ports on ${r.devices} devices; ${t.ports_with_references} with public references${r.budget_exhausted ? " (limit reached)" : ""}`, "ok");
+        loadFindings();
+      } catch (ex) { toast(ex.message, "error"); }
+      finally { vc.disabled = false; }
+    });
     $("#fn-prev").addEventListener("click", () => { if (findState.page > 1) { findState.page--; loadFindings(); } });
     $("#fn-next").addEventListener("click", () => { findState.page++; loadFindings(); });
     loadFindings();

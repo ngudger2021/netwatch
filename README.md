@@ -267,6 +267,18 @@ Browser clients use the session cookie. Scripts can log in with `POST /auth/logi
 
 ---
 
+## Known-exploit checks (searchsploit)
+
+Requires the ExploitDB tools on the Pi: `sudo apt install exploitdb`.
+
+- Runs from the **Findings** page with **Check known exploits** (admin), or `POST /api/v1/vulnerability-checks` with `{}` for all devices or `{"device_id": N}` for one.
+- It reads the product and version nmap recorded for each open port and searches a local copy of ExploitDB. **It does not contact the device.**
+- A match is stored as a medium-severity finding titled *"Public exploit references for detected version (unverified)"* with the ExploitDB IDs and any CVE IDs ExploitDB lists. A match means public material exists for a similar version. It does not prove the device is vulnerable. Banners can be wrong, and many entries are for other platforms.
+- Each run is limited to 200 lookups. Ports whose product is blank or contains unusual characters are skipped.
+- Check the tool status with `GET /api/v1/vulnerability-tools`.
+
+Not yet available: the `vulners` NSE script and Nuclei templates. Both need approval (see IMPLEMENTATION_CHECKLIST.md).
+
 ## Tests
 
 ```bash
