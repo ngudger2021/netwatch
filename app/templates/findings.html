@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Security findings{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <div><h1 class="h3 mb-0">Security findings</h1>
+  <p class="small text-secondary mb-0">Evidence-based, non-intrusive checks. An open port alone is not a vulnerability.</p></div>
+  <div class="d-flex gap-2">
+    <select id="fs-status" class="form-select form-select-sm" style="width:auto">
+      <option value="open">Open</option><option value="acknowledged">Acknowledged</option><option value="resolved">Resolved</option><option value="all">All</option></select>
+    <select id="fs-sev" class="form-select form-select-sm" style="width:auto">
+      <option value="">Any severity</option><option>critical</option><option>high</option><option>medium</option><option>low</option><option>info</option></select>
+  </div>
+</div>
+<div class="card nw-card"><div class="table-responsive">
+  <table class="table table-dark table-hover mb-0 nw-table">
+    <thead><tr><th>Severity</th><th>Finding</th><th>Device</th><th>Port</th><th>Evidence</th><th>Remediation</th><th>Status</th><th>Detected</th><th></th></tr></thead>
+    <tbody id="findings-body"></tbody></table></div></div>
+<nav class="d-flex justify-content-end gap-2 mt-2 small"><div class="btn-group btn-group-sm">
+  <button class="btn btn-outline-secondary" id="fn-prev">Previous</button><button class="btn btn-outline-secondary" id="fn-next">Next</button></div></nav>
+{% endblock %}

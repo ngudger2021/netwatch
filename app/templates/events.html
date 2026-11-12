@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+  <h1 class="h3 mb-0">Event history</h1>
+  <div class="d-flex gap-2">
+    <input id="ev-type" class="form-control form-control-sm" style="width:auto" placeholder="Type, e.g. port_opened" maxlength="40">
+    <select id="ev-sev" class="form-select form-select-sm" style="width:auto">
+      <option value="">Any severity</option><option>critical</option><option>high</option><option>medium</option><option>low</option><option>info</option></select>
+  </div>
+</div>
+<div class="card nw-card"><div class="table-responsive">
+  <table class="table table-dark table-hover mb-0 nw-table">
+    <thead><tr><th>Time</th><th>Type</th><th>Severity</th><th>Description</th></tr></thead>
+    <tbody id="events-body"></tbody></table></div></div>
+<nav class="d-flex justify-content-end mt-2"><div class="btn-group btn-group-sm">
+  <button class="btn btn-outline-secondary" id="ev-prev">Previous</button><button class="btn btn-outline-secondary" id="ev-next">Next</button></div></nav>
+{% endblock %}

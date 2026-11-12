@@ -1,0 +1,42 @@
+[Unit]
+Description=Kali NetWatch web dashboard and API
+Documentation=file:///opt/kali-netwatch/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kalinetwatch
+Group=kalinetwatch
+WorkingDirectory=/opt/kali-netwatch
+EnvironmentFile=/etc/kali-netwatch/netwatch.env
+Environment=NETWATCH_CONFIG=/etc/kali-netwatch/netwatch.toml
+# Bind address and port come from [app] bind_host / bind_port in netwatch.toml.
+ExecStart=/opt/kali-netwatch/.venv/bin/python -m app.cli serve
+Restart=on-failure
+RestartSec=5
+
+# Hardening: the web process is unprivileged, cannot gain privileges and sees only its data directory.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/kali-netwatch
+MemoryMax=300M
+
+[Install]
+WantedBy=multi-user.target

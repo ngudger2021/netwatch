@@ -1,0 +1,39 @@
+[Unit]
+Description=Kali NetWatch scheduler and scan runner
+Documentation=file:///opt/kali-netwatch/README.md
+After=network-online.target kali-netwatch-web.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kalinetwatch
+Group=kalinetwatch
+WorkingDirectory=/opt/kali-netwatch
+EnvironmentFile=/etc/kali-netwatch/netwatch.env
+Environment=NETWATCH_CONFIG=/etc/kali-netwatch/netwatch.toml
+ExecStart=/opt/kali-netwatch/.venv/bin/python -m app.cli scheduler
+# Persistent schedules live in the database, so a reboot resumes the normal cadence without catch-up storms.
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=30
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/kali-netwatch
+MemoryMax=400M
+Nice=5
+
+[Install]
+WantedBy=multi-user.target

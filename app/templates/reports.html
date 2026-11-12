@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1 class="h3 mb-1">Reports</h1>
+<p class="small text-secondary">Downloads are generated on demand from the current database.</p>
+<div class="table-responsive"><table class="table table-dark table-hover nw-table">
+  <thead><tr><th>Dataset</th><th>Contents</th><th>CSV</th><th>JSON</th><th>HTML</th></tr></thead>
+  <tbody>
+  {% for name, desc in [("inventory","Device inventory with identity, status, risk"), ("ports","Open and closed ports by device"), ("findings","Security findings with evidence and remediation"), ("changes","Recent change events (latest 1000)"), ("statistics","Scan and device statistics")] %}
+  <tr><td class="fw-semibold">{{ name|capitalize }}</td><td class="small text-secondary">{{ desc }}</td>
+    {% for fmt in ["csv","json","html"] %}<td><a class="btn btn-sm btn-outline-info" href="/api/v1/reports/{{ name }}/{{ fmt }}">{{ fmt|upper }}</a></td>{% endfor %}
+  </tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

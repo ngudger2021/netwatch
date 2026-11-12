@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-12 col-sm-8 col-md-5 col-lg-4">
+    <div class="card nw-card p-4">
+      <div class="text-center mb-3"><span class="nw-logo nw-logo-lg"></span>
+        <h1 class="h4 mt-2 mb-0">Kali NetWatch</h1>
+        <p class="small text-secondary">Sign in to the network monitor</p></div>
+      <form id="login-form" autocomplete="on" novalidate>
+        <div class="mb-3"><label class="form-label" for="username">Username</label>
+          <input class="form-control" id="username" name="username" required maxlength="64" autocomplete="username"></div>
+        <div class="mb-3"><label class="form-label" for="password">Password</label>
+          <input class="form-control" id="password" name="password" type="password" required maxlength="256" autocomplete="current-password"></div>
+        <div id="login-error" class="alert alert-danger d-none py-2 small" role="alert"></div>
+        <button class="btn btn-primary w-100" type="submit">Sign in</button>
+      </form>
+    </div>
+    <p class="small text-secondary text-center mt-3">Local access only by default. Use HTTPS when exposed through a reverse proxy.</p>
+  </div>
+</div>
+{% endblock %}

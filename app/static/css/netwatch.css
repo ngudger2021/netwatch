@@ -1,0 +1,60 @@
+/* Kali NetWatch dark theme. Colour tokens live on :root for easy re-theming. */
+:root {
+  --nw-bg: #0b1017;
+  --nw-surface: #131b26;
+  --nw-surface-2: #1a2535;
+  --nw-border: #243247;
+  --nw-text: #e6edf6;
+  --nw-muted: #8ea0b8;
+  --nw-accent: #22d3ee;
+  --nw-accent-2: #6366f1;
+  --nw-ok: #34d399;
+  --nw-warn: #fbbf24;
+  --nw-bad: #f87171;
+}
+body { background: var(--nw-bg); color: var(--nw-text); min-height: 100vh; }
+.nw-nav { background: linear-gradient(90deg, #0d1521, #111c2c); border-bottom: 1px solid var(--nw-border); }
+.nw-nav .nav-link { color: var(--nw-muted); }
+.nw-nav .nav-link:hover, .nw-nav .nav-link.active { color: var(--nw-text); }
+.nw-nav .nav-link.active { box-shadow: inset 0 -2px 0 var(--nw-accent); }
+.nw-logo { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: .5rem;
+  background: conic-gradient(var(--nw-accent), var(--nw-accent-2), var(--nw-accent)); box-shadow: 0 0 12px rgba(34,211,238,.5); }
+.nw-logo-lg { width: 40px; height: 40px; }
+.nw-card { background: var(--nw-surface); border: 1px solid var(--nw-border); border-radius: 14px; }
+.nw-card .card-body { padding: 1.1rem 1.2rem; }
+.nw-table { --bs-table-bg: transparent; --bs-table-border-color: var(--nw-border); font-size: .9rem; }
+.nw-table th { color: var(--nw-muted); font-weight: 500; white-space: nowrap; }
+.nw-table th[data-sort] { cursor: pointer; }
+.nw-table td { vertical-align: middle; }
+.stat-value { font-size: 1.9rem; font-weight: 600; line-height: 1.1; }
+.stat-label { color: var(--nw-muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.stat-card { position: relative; overflow: hidden; }
+.stat-card::after { content: ""; position: absolute; inset: auto -20px -40px auto; width: 90px; height: 90px;
+  border-radius: 50%; background: radial-gradient(circle, rgba(34,211,238,.18), transparent 70%); }
+.stat-card.bad::after { background: radial-gradient(circle, rgba(248,113,113,.22), transparent 70%); }
+.stat-card.good::after { background: radial-gradient(circle, rgba(52,211,153,.2), transparent 70%); }
+.activity-list li { padding: .45rem 0; border-bottom: 1px solid var(--nw-border); }
+.activity-list li:last-child { border-bottom: 0; }
+.nw-log { background: #070b11; color: #b7c6da; border-radius: 8px; padding: .75rem; max-height: 260px; overflow: auto; white-space: pre-wrap; }
+.badge-sev-critical, .badge-sev-high { background: rgba(248,113,113,.18) !important; color: var(--nw-bad) !important; }
+.badge-sev-medium { background: rgba(251,191,36,.16) !important; color: var(--nw-warn) !important; }
+.badge-sev-low { background: rgba(99,102,241,.2) !important; color: #a5b4fc !important; }
+.badge-sev-info { background: rgba(142,160,184,.16) !important; color: var(--nw-muted) !important; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: .4rem; }
+.dot-online { background: var(--nw-ok); box-shadow: 0 0 8px rgba(52,211,153,.6); }
+.dot-offline { background: var(--nw-bad); }
+.dot-unknown { background: var(--nw-muted); }
+.risk-bar { height: 6px; border-radius: 4px; background: var(--nw-surface-2); min-width: 70px; overflow: hidden; }
+.risk-bar > span { display: block; height: 100%; }
+.toast { background: var(--nw-surface-2); color: var(--nw-text); border: 1px solid var(--nw-border); }
+.clickable-row { cursor: pointer; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; }
+.form-control, .form-select { background-color: #0f1622; border-color: var(--nw-border); color: var(--nw-text); }
+.form-control:focus, .form-select:focus { border-color: var(--nw-accent); box-shadow: 0 0 0 .15rem rgba(34,211,238,.2); }
+.non-admin-only.d-none { display: none !important; }
+@media (max-width: 575px) { .stat-value { font-size: 1.5rem; } .nw-table { font-size: .82rem; } }
+
+/* Chart.js with maintainAspectRatio:false fills its parent; a fixed-height box stops the
+   dashboard from growing (and scrolling) every time a chart resizes. */
+.chart-box { position: relative; height: 240px; width: 100%; }
+.chart-box.tall { height: 280px; }

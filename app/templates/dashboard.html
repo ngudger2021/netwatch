@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Overview</h1>
+  <div id="scan-status" class="small text-secondary"></div>
+</div>
+<div class="row g-3" id="stat-cards"></div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12 col-xl-8">
+    <div class="row g-3">
+      <div class="col-12 col-lg-6"><div class="card nw-card h-100"><div class="card-body">
+        <h2 class="h6 text-secondary">Online vs offline</h2><div class="chart-box"><canvas id="chart-status"></canvas></div></div></div></div>
+      <div class="col-12 col-lg-6"><div class="card nw-card h-100"><div class="card-body">
+        <h2 class="h6 text-secondary">Devices per subnet</h2><div class="chart-box"><canvas id="chart-subnets"></canvas></div></div></div></div>
+      <div class="col-12"><div class="card nw-card"><div class="card-body">
+        <h2 class="h6 text-secondary">Availability, last 48 hours (%)</h2><div class="chart-box"><canvas id="chart-availability"></canvas></div></div></div></div>
+      <div class="col-12 col-lg-6"><div class="card nw-card"><div class="card-body">
+        <h2 class="h6 text-secondary">New device discoveries (14 days)</h2><div class="chart-box"><canvas id="chart-discoveries"></canvas></div></div></div></div>
+      <div class="col-12 col-lg-6"><div class="card nw-card"><div class="card-body">
+        <h2 class="h6 text-secondary">Open ports by service</h2><div class="chart-box"><canvas id="chart-ports"></canvas></div></div></div></div>
+      <div class="col-12 col-lg-6"><div class="card nw-card"><div class="card-body">
+        <h2 class="h6 text-secondary">Open findings by severity</h2><div class="chart-box"><canvas id="chart-findings"></canvas></div></div></div></div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-4">
+    <div class="card nw-card mb-3"><div class="card-body">
+      <h2 class="h6 text-secondary">Raspberry Pi</h2>
+      <div id="pi-metrics" class="small"></div></div></div>
+    <div class="card nw-card mb-3"><div class="card-body">
+      <h2 class="h6 text-secondary">Run a scan</h2>
+      <div class="d-grid gap-2">
+        <button class="btn btn-outline-info btn-sm admin-only" data-quick-scan="quick">Discovery (quick)</button>
+        <button class="btn btn-outline-info btn-sm admin-only" data-quick-scan="standard">Standard service scan</button>
+        <a class="btn btn-outline-secondary btn-sm" href="/scans">Advanced scans…</a>
+      </div>
+      <div id="next-scan" class="small text-secondary mt-3"></div></div></div>
+    <div class="card nw-card"><div class="card-body">
+      <h2 class="h6 text-secondary">Activity</h2>
+      <ul id="activity" class="list-unstyled small mb-0 activity-list"></ul></div></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+# Kali NetWatch configuration. Copy to config/netwatch.toml (the installer does this).
+# Secrets are NOT stored here; see .env.example.
+
+[app]
+data_dir = "/var/lib/kali-netwatch"   # database, reports, scan logs, lock file
+bind_host = "127.0.0.1"               # keep localhost; see README for trusted-LAN exposure
+bind_port = 8787
+session_ttl_hours = 12
+secure_cookies = false                # set true when served over HTTPS via reverse proxy
+history_retention_days = 180
+
+[networks]
+cidrs = ["192.168.50.0/24", "192.168.1.0/24"]
+
+[scanning]
+nmap_path = "/usr/bin/nmap"
+privileged = false        # true = discovery uses ARP/ICMP via sudo (requires use_sudo)
+use_sudo = false
+max_hosts_per_target = 1024
+job_timeout_seconds = 3600
+host_timeout_seconds = 300
+max_parallelism = 16
+nice_level = 10
+top_ports = 100
+default_detailed_ports = "1-1024"
+oui_file = "/usr/share/nmap/nmap-mac-prefixes"
+
+[schedule]
+enabled = true
+discovery_minutes = 15    # Quick scan (host discovery)
+standard_hours = 6        # Standard scan (common ports + light service detection)
+summary_hours = 24        # Telegram daily summary
+
+[change]
+offline_threshold = 3     # successful scans a device must be absent before it is 'offline'
+recent_days = 7
+
+[telegram]
+enabled = false
+cooldown_seconds = 900
+daily_summary = true

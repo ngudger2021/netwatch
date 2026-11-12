@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmaprun scanner="nmap" args="nmap -sT --top-ports 100 -sV --version-light -oX - 192.168.50.0/24" start="1762000000" version="7.91">
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.50.1" addrtype="ipv4"/>
+<address addr="30:DE:4B:11:22:33" addrtype="mac" vendor="ASUSTek COMPUTER INC."/>
+<hostnames><hostname name="router.lan" type="PTR"/></hostnames>
+<ports><extraports state="closed" count="97"/>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack"/><service name="ssh" product="OpenSSH" version="8.9p1 Ubuntu" extrainfo="Ubuntu Linux; protocol 2.0" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="23"><state state="open" reason="syn-ack"/><service name="telnet" method="table" conf="3"/></port>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack"/><service name="http" product="micro_httpd" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack"/><service name="https" tunnel="ssl" method="table" conf="3"/></port>
+</ports></host>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.50.5" addrtype="ipv4"/>
+<address addr="9C:8E:99:AA:BB:CC" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames/>
+<ports>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack"/><service name="https" product="HP iLO" version="2.x" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="5900"><state state="open" reason="syn-ack"/><service name="vnc" product="RealVNC" version="6.0" method="probed" conf="10"/></port>
+</ports></host>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.50.84" addrtype="ipv4"/>
+<address addr="2A:4D:5E:6F:70:81" addrtype="mac"/>
+<hostnames/>
+<ports><port protocol="tcp" portid="8001"><state state="open" reason="syn-ack"/><service name="http" product="Samsung Tizen" method="probed" conf="10"/></port></ports></host>
+<host><status state="down" reason="no-response"/><address addr="192.168.50.200" addrtype="ipv4"/></host>
+<runstats><finished time="1762000600" elapsed="600.12" summary="Nmap done; 256 IP addresses (3 hosts up) scanned in 600.12 seconds"/><hosts up="3" down="253" total="256"/></runstats>
+</nmaprun>

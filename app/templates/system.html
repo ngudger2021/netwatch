@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}System{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Raspberry Pi &amp; services</h1>
+<div class="row g-3" id="sys-cards"></div>
+<div class="row g-3 mt-1">
+  <div class="col-12 col-lg-6"><div class="card nw-card"><div class="card-body">
+    <h2 class="h6 text-secondary">Network interfaces</h2>
+    <table class="table table-dark table-sm nw-table mb-0"><tbody id="sys-ifaces"></tbody></table></div></div></div>
+  <div class="col-12 col-lg-6"><div class="card nw-card"><div class="card-body">
+    <h2 class="h6 text-secondary">Services</h2>
+    <table class="table table-dark table-sm nw-table mb-0"><tbody id="sys-services"></tbody></table></div></div></div>
+</div>
+<p class="small text-secondary mt-3">Refreshes every 10 seconds. Load: <span id="sys-load"></span></p>
+{% endblock %}

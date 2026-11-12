@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Devices{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Device inventory</h1>
+  <div class="btn-group btn-group-sm">
+    <a class="btn btn-outline-secondary" href="/api/v1/reports/inventory/csv">CSV</a>
+    <a class="btn btn-outline-secondary" href="/api/v1/reports/inventory/json">JSON</a>
+    <a class="btn btn-outline-secondary" href="/api/v1/reports/inventory/html">HTML</a>
+  </div>
+</div>
+<form id="filters" class="card nw-card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-md-4 col-xl-3"><label class="form-label small" for="f-q">Search</label>
+      <input class="form-control form-control-sm" id="f-q" placeholder="Name, IP, MAC, vendor…" maxlength="100"></div>
+    <div class="col-6 col-md-2"><label class="form-label small" for="f-network">Network</label>
+      <select class="form-select form-select-sm" id="f-network"><option value="">All</option></select></div>
+    <div class="col-6 col-md-2"><label class="form-label small" for="f-status">Status</label>
+      <select class="form-select form-select-sm" id="f-status"><option value="">Any</option><option>online</option><option>offline</option><option>unknown</option></select></div>
+    <div class="col-6 col-md-2"><label class="form-label small" for="f-type">Type</label>
+      <select class="form-select form-select-sm" id="f-type"><option value="">Any</option><option>router</option><option>server</option><option>workstation</option><option>media</option><option>camera</option><option>printer</option><option>smart-home</option><option>server-mgmt</option><option>single-board</option><option>unknown</option></select></div>
+    <div class="col-6 col-md-2"><label class="form-label small" for="f-risk">Risk</label>
+      <select class="form-select form-select-sm" id="f-risk"><option value="">Any</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+    <div class="col-12 col-md-4 col-xl-3"><label class="form-label small" for="f-vendor">Vendor contains</label>
+      <input class="form-control form-control-sm" id="f-vendor" maxlength="100"></div>
+    <div class="col-12 col-md-auto"><button class="btn btn-sm btn-outline-secondary" type="reset" id="f-reset">Clear</button></div>
+  </div>
+</form>
+<div class="card nw-card">
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0 nw-table" id="devices-table">
+      <thead><tr>
+        <th data-sort="ip">IP</th><th data-sort="hostname">Name</th><th class="d-none d-md-table-cell">MAC</th>
+        <th class="d-none d-lg-table-cell" data-sort="vendor">Vendor</th><th class="d-none d-xl-table-cell" data-sort="network">Network</th>
+        <th data-sort="type" class="d-none d-md-table-cell">Type</th><th data-sort="status">Status</th>
+        <th class="d-none d-lg-table-cell" data-sort="last_seen">Last seen</th><th data-sort="ports">Ports</th>
+        <th data-sort="risk">Risk</th><th>Trusted</th>
+      </tr></thead>
+      <tbody id="devices-body"><tr><td colspan="11" class="text-secondary p-4">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<nav class="d-flex justify-content-between align-items-center mt-3 small">
+  <span id="devices-count" class="text-secondary"></span>
+  <div class="btn-group btn-group-sm"><button class="btn btn-outline-secondary" id="prev-page">Previous</button>
+    <button class="btn btn-outline-secondary" id="next-page">Next</button></div>
+</nav>
+{% endblock %}

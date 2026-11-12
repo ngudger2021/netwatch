@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmaprun scanner="nmap" args="nmap -sn -PS22,80,443 -oX - 192.168.1.0/24" start="1762000000" version="7.91">
+<scaninfo type="connect" protocol="tcp" numservices="1" services="22"/>
+<host starttime="1762000001" endtime="1762000002"><status state="up" reason="syn-ack"/>
+<address addr="192.168.1.10" addrtype="ipv4"/>
+<hostnames><hostname name="nas.lan" type="PTR"/></hostnames>
+<times srtt="1000" rttvar="100" to="100000"/></host>
+<host><status state="up" reason="syn-ack"/>
+<address addr="192.168.1.11" addrtype="ipv4"/>
+<hostnames/></host>
+<host><status state="down" reason="no-response"/>
+<address addr="192.168.1.99" addrtype="ipv4"/></host>
+<runstats><finished time="1762000010" timestr="x" elapsed="9.50" summary="Nmap done; 256 IP addresses (2 hosts up) scanned in 9.50 seconds" exit="success"/>
+<hosts up="2" down="254" total="256"/></runstats>
+</nmaprun>
